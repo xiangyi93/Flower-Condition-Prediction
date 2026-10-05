@@ -1,0 +1,39 @@
+[segmentation]
+# Public template only. Datasets and checkpoints are not included in this repository.
+# All relative paths are resolved from the repository root.
+train_data = "Segmentation/datasets/train"
+test_data = "Segmentation/datasets/test"
+epochs = 30
+val_split = 0.2
+seed = 42
+# Leave empty for a fresh run. Set a previous last_checkpoint.pth to resume training.
+resume_from = ""
+generate_masks_if_missing = true
+training_output_dir = "Segmentation/output/training"
+inference_output_dir = "Segmentation/output/inference"
+
+# This checkpoint is used by evaluation and single-image pipeline inference.
+# After training a new experiment, update this path to that experiment's best_model.pth.
+checkpoint_path = "Segmentation/output/training/best_model.pth"
+
+[classification]
+# YOLO training and pipeline inference share this run location.
+train_data = "Recognition/datasets"
+base_model = "yolo11n-cls.pt"
+epochs = 50
+image_size = 224
+batch_size = 16
+patience = 10
+device = "auto"
+training_project_dir = "runs/classify"
+training_run_name = "flower_stage_yolo11n"
+checkpoint_path = "runs/classify/flower_stage_yolo11n/weights/best.pt"
+
+[pipeline]
+output_root = "output/pipeline"
+min_area_ratio = 0.001
+device = "auto"
+
+[evaluation]
+output_dir = "Segmentation/output/evaluation"
+batch_size = 4

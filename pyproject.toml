@@ -1,0 +1,34 @@
+[project]
+name = "dino-segformer"
+version = "0.1.0"
+description = "DINOv3 semantic segmentation and YOLO11n-cls flower-stage recognition pipeline"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "albumentations>=2.0.8",
+    "huggingface-hub>=1.8.0",
+    "numpy>=2.4.3",
+    "opencv-python>=4.13.0.92",
+    "pillow>=12.1.1",
+    "scikit-learn>=1.8.0",
+    "seaborn>=0.13.2",
+    "transformers>=5.3.0",
+    "ultralytics>=8.4.60",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "label_region_export"]
+pythonpath = ["."]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

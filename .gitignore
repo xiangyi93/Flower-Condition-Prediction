@@ -1,0 +1,98 @@
+# Python bytecode and tool caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+.hypothesis/
+.ipynb_checkpoints/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Build and packaging outputs
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual environments and local dependency caches
+.venv/
+venv/
+env/
+.uv-cache*/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+.pypirc
+*.pem
+*.key
+*.p12
+*.pfx
+client_secret*.json
+credentials*.json
+service-account*.json
+configs/local*.toml
+
+# Raw and derived datasets
+/datasets/
+/Segmentation/datasets/
+/Recognition/datasets/
+/Recognition/datasets_prepared*/
+/Recognition/label_regions/
+
+# Model weights and exported runtimes
+*.pt
+*.pth
+*.pth.tar
+*.ckpt
+*.onnx
+*.engine
+*.safetensors
+*.tflite
+
+# Training, evaluation and inference artifacts
+# Copy small, curated public summaries or figures to docs/results/ instead.
+/output/
+/runs/
+/semantic_output/
+/Segmentation/output/
+/Recognition/evaluation/
+/unet_resnet34/output/
+/dinov3_linear_head/output/
+/research_analysis/results_*/
+/artifacts/
+/logs/
+wandb/
+mlruns/
+*.npy
+*.npz
+*.log
+
+# One-off review files and private application documents
+/tmp/
+/推甄資料/
+~$*.docx
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Scratch files created by local inspection utilities
+/Segmentation/mask.png
+note.txt
+AGENTS.md
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
