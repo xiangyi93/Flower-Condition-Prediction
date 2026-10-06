@@ -37,24 +37,6 @@ DINOv3＋MLP 輸出背景、櫻花、金針花及繡球花四類遮罩。流程�
 | `label_region_export/` | 將 Labelme 標註轉成各花種的黑底 RGB 影像，供分類資料整理使用。 |
 | `tests/` | 驗證資料切分、前處理、模型輸出、指標與完整流程。 |
 
-### 主要程式
-
-| 程式 | 用途 |
-|---|---|
-| `Segmentation/data.py`、`getMask.py` | 配對原圖與遮罩，並將 Labelme JSON 轉為四類索引遮罩。 |
-| `Segmentation/train.py`、`metrics.py` | 定義 DINOv3＋MLP、訓練函式、Dice loss 與 mIoU 計算。 |
-| `Segmentation/evaluate.py` | 輸出 mIoU、Dice、混淆矩陣等分割指標。 |
-| `Segmentation/experiment_runner.py` | 提供共用的資料切分、訓練與評估流程。 |
-| `Recognition/prepare_data.py` | 建立 train／val／test 結構，並用 SHA-256 檢查完全重複影像。 |
-| `Recognition/preprocessing.py`、`classifier.py` | 統一前景裁切、補邊及 YOLO 訓練、驗證與推論介面。 |
-| `Recognition/YOLOv11.py` | 準備分類資料並訓練 YOLO11n-cls。 |
-| `Recognition/predict.py`、`evaluate.py` | 執行單張分類，並輸出九類、花種與花況指標。 |
-| `Recognition/preview_preprocessing.py`、`plot_confusion_matrices.py` | 產生前處理預覽與混淆矩陣圖，供人工檢查。 |
-| `label_region_export/export_label_regions.py` | 將 Labelme 標註轉為各花種的黑底 RGB 中間影像。 |
-| `pipeline_predict.py` | 執行單張影像的分割、三分支轉換與花況分類。 |
-| `pipeline_evaluate.py` | 評估 DINO→YOLO 串接、面積門檻及與人工標註的對應關係。 |
-| `project_config.py` | 讀取 TOML，並將相對路徑解析至 repository 根目錄。 |
-| `pyproject.toml`、`uv.lock` | 定義 Python 版本、相依套件與品質檢查工具。 |
 
 ## 執行方式
 
