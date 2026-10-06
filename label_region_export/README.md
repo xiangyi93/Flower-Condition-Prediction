@@ -1,5 +1,6 @@
 # 依 Labelme 標註輸出四類影像
 
+將圖片依照label json檔案切出圖片，用來YOLOv11訓練
 程式、說明與測試集中在 `label_region_export/`：
 
 ```text
@@ -17,10 +18,10 @@ uv run --no-sync --python 3.13 python label_region_export/export_label_regions.p
 ```
 
 預設讀取 `configs/default.toml` 的 `segmentation.train_data` 與
-`segmentation.test_data`，不混用其他日期的資料集。也可以指定來源：
+`segmentation.test_data`。也可以指定來源：
 
 ```powershell
-uv run --no-sync --python 3.13 python label_region_export/export_label_regions.py --train-dir Segmentation/datasets/train_data/traindata0929 --test-dir Segmentation/datasets/test_img/testdata0929 --output-dir Recognition/label_regions_v2
+uv run --no-sync --python 3.13 python label_region_export/export_label_regions.py --train-dir Segmentation/datasets/train --test-dir Segmentation/datasets/test --output-dir Recognition/label_regions
 ```
 
 只測試此工具：
@@ -57,4 +58,4 @@ Recognition/label_regions/
 - 以解碼後的 RGB 像素雜湊檢查 train/test 完全相同的影像，若發現則停止；這不能排除連拍、重新壓縮或不同裁切造成的近似重複，仍需依拍攝來源檢查。
 - train/test 使用相同前處理，沒有隨機增強。manifest.csv 記錄來源、編號、雜湊與各類像素數，方便追溯和挑出空白類別。
 
-這是依花種分組的中間資料，後續仍要人工標註 initial/half/full，才可作為花況分類資料集；不存在的花種所產生的全黑圖不應直接加入花況訓練。人工標註遮罩的品質不代表實際分割模型品質，部署評估仍應另測模型產生的輸入。
+這是依花種分組的中間資料，後續仍要人工標註 green/half/full，才可作為花況分類資料集；不存在的花種所產生的全黑圖不應直接加入花況訓練。人工標註遮罩的品質不代表實際分割模型品質，部署評估仍應另測模型產生的輸入。

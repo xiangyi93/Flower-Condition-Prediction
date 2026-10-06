@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 
@@ -37,6 +38,8 @@ def labelme_json_to_dataset(json_dir):
         mask_name = json_file.replace('.json', '.png')
         Image.fromarray(mask).save(os.path.join(output_mask_dir, mask_name))
 
-# 執行轉換
 if __name__ == "__main__":
-    labelme_json_to_dataset("datasets/train_data/traindata0520")
+    parser = argparse.ArgumentParser(description="Convert Labelme JSON files to masks.")
+    parser.add_argument("json_dir", help="Directory containing paired images and Labelme JSON files")
+    arguments = parser.parse_args()
+    labelme_json_to_dataset(arguments.json_dir)

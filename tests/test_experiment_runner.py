@@ -1,11 +1,8 @@
-from types import SimpleNamespace
-
 import numpy as np
 import pytest
 import torch
 from PIL import Image
 
-from dinov3_linear_head.model import DINOv3LinearSeg
 from Segmentation.experiment_runner import (
     SegmentationDataset,
     evaluation_transform,
@@ -13,36 +10,6 @@ from Segmentation.experiment_runner import (
     train_model,
     training_transform,
 )
-from unet_resnet34.model import UNetResNet34
-
-
-class FakeDINO(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.config = SimpleNamespace(hidden_size=8, num_register_tokens=4)
-        self.projection = torch.nn.Linear(3, 8)
-
-    def forward(self, pixel_values):
-        batch = pixel_values.shape[0]
-        tokens = torch.zeros(batch, 5 + 16, 8, device=pixel_values.device)
-        return SimpleNamespace(last_hidden_state=tokens)
-
-
-def test_unet_resnet34_preserves_spatial_shape() -> None:
-    model = UNetResNet34(num_classes=4, pretrained=False).eval()
-    with torch.no_grad():
-        output = model(torch.randn(1, 3, 64, 64))
-    assert output.shape == (1, 4, 64, 64)
-
-
-def test_dinov3_linear_head_freezes_backbone_and_preserves_shape() -> None:
-    model = DINOv3LinearSeg(num_classes=4, backbone=FakeDINO())
-    model.train()
-    output = model(torch.randn(2, 3, 64, 64))
-    assert output.shape == (2, 4, 64, 64)
-    assert model.backbone.training is False
-    assert all(not parameter.requires_grad for parameter in model.backbone.parameters())
-    assert all(parameter.requires_grad for parameter in model.linear_head.parameters())
 
 
 def test_pixel_ap_uses_scores_and_excludes_absent_class() -> None:

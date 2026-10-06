@@ -57,15 +57,11 @@ configs/local*.toml
 *.tflite
 
 # Training, evaluation and inference artifacts
-# Copy small, curated public summaries or figures to docs/results/ instead.
 /output/
 /runs/
 /semantic_output/
 /Segmentation/output/
 /Recognition/evaluation/
-/unet_resnet34/output/
-/dinov3_linear_head/output/
-/research_analysis/results_*/
 /artifacts/
 /logs/
 wandb/

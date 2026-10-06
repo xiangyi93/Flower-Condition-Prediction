@@ -32,11 +32,6 @@ SPECIES_ORDER = ("cherry", "hydrangeas", "daylily")
 STAGE_ORDER = ("green", "half", "full")
 STAGE_ZH = {"green": "未開花", "half": "半開", "full": "盛開"}
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".webp"}
-SENSITIVITY_EXCLUSIONS = {
-    "72560_0": "Labelme linestrip 標註語義待人工確認",
-    "S__6127646_0": "與訓練影像 S__6127647_0 為近似場景",
-}
-
 
 def parse_sample_number(filename: str) -> int:
     """Extract the six-digit source number retained in classification crops."""
@@ -335,12 +330,9 @@ def evaluate_pipeline(
         )
 
     segmentation_metrics = metrics_from_confusion_matrix(pixel_matrix)
-    sensitivity_rows = [row for row in rows if row["image_stem"] not in SENSITIVITY_EXCLUSIONS]
     thresholds = sorted(set([0.0, 0.0001, 0.0005, min_area_ratio, 0.002, 0.005, 0.01]))
     sweep = threshold_rows(rows, thresholds)
     primary = metrics_for_subset(rows, min_area_ratio)
-    sensitivity = metrics_for_subset(sensitivity_rows, min_area_ratio)
-    by_species, by_stage, confidence = classification_breakdown(rows)
     by_species, by_stage, confidence = classification_breakdown(rows)
 
     stage_eligible = [row for row in rows if row["true_stage"] and row["status"] == "ok"]
@@ -396,7 +388,6 @@ def evaluate_pipeline(
         "classification_by_species": by_species,
         "classification_by_stage": by_stage,
         "confidence_diagnostic": confidence,
-        "sensitivity_35_images": sensitivity,
         "reference_crop_audit": {
             "audited": len(reference_audit),
             "exact_matches": sum(row["exact_pixel_match"] for row in reference_audit),
@@ -412,7 +403,6 @@ def evaluate_pipeline(
             }
             for species in SPECIES_ORDER
         },
-        "sensitivity_exclusions": SENSITIVITY_EXCLUSIONS,
     }
     (output_dir / "summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -430,11 +420,7 @@ def write_markdown_report(path: Path, summary: dict, sweep: list[dict]) -> None:
     pipeline = summary["pipeline"]
     stages = pipeline["stages"]
     presence = pipeline["presence"]
-    sensitivity = summary["sensitivity_35_images"]
     audit = summary["reference_crop_audit"]
-    by_species = summary["classification_by_species"]
-    by_stage = summary["classification_by_stage"]
-    confidence = summary["confidence_diagnostic"]
     by_species = summary["classification_by_species"]
     by_stage = summary["classification_by_stage"]
     confidence = summary["confidence_diagnostic"]
@@ -509,18 +495,11 @@ def write_markdown_report(path: Path, summary: dict, sweep: list[dict]) -> None:
         f"- 花況標籤影像與相同編號、相同植物的人工分割區域逐像素比對：{audit['exact_matches']}/{audit['audited']} 完全一致；最低像素一致率 {percent(audit['minimum_matching_pixel_fraction'])}。",
         f"- 有 {summary['scope']['gt_present_without_stage']} 組人工遮罩含植物但沒有花況標籤；保留在分割與植物存在評估，不納入花況準確率分母。",
         "- 評估直接呼叫正式 pipeline 的 DINO `predict_mask`，YOLO 則讀取 checkpoint 內保存的 `ForegroundLetterbox`。分類訓練、驗證與推論使用相同裁切、縮放及填黑幾何；只有訓練集額外使用水平翻轉。",
-        "- 主結果保留完整 37 張測試影像。另排除 `72560_0` 的 linestrip 標註疑義與 `S__6127646_0` 的近似場景後，提供 35 張敏感度結果。這個子集仍不是新的獨立測試集。",
-        f"- 35 張敏感度子集的端到端花況正確率：{percent(sensitivity['stages']['system_accuracy'])}；條件式正確率：{percent(sensitivity['stages']['conditional_accuracy'])}。", "",
-        "## 結論與建議", "",
-        "- 目前 `0.001` 門檻只漏掉 1 組有花況真值的區域，端到端瓶頸主要是 half／full 分類，不是門檻造成的大量淘汰。",
-        "- daylily 的分割 IoU 最低；應先針對其邊界與小區域標註做人工抽查。花況部分則優先檢查 hydrangeas，以及 half／full 的標籤一致性。",
-        "- 在這批 test 上，`0.01` 可消除目前唯一的植物不存在誤報，且不再增加有真值區域的漏判；這只能列為候選值，應用 validation 或新的校正集決定，不能用同一 test 調參後再把本報告當最終成績。",
-        "- 部署時應繼續輸出 `all_black`、`area_too_small` 與 DINO／YOLO 植物種類不一致警示；高 confidence 仍可能判錯。", "",
-        "## 結論與建議", "",
-        "- 目前 `0.001` 門檻只漏掉 1 組有花況真值的區域，端到端瓶頸主要是 half／full 分類，不是門檻造成的大量淘汰。",
-        "- daylily 的分割 IoU 最低；應先針對其邊界與小區域標註做人工抽查。花況部分則優先檢查 hydrangeas，以及 half／full 的標籤一致性。",
-        "- 在這批 test 上，`0.01` 可消除目前唯一的植物不存在誤報，且不再增加有真值區域的漏判；這只能列為候選值，應用 validation 或新的校正集決定，不能用同一 test 調參後再把本報告當最終成績。",
-        "- 部署時應繼續輸出 `all_black`、`area_too_small` 與 DINO／YOLO 植物種類不一致警示；高 confidence 仍可能判錯。", "",
+        "## 結論與判讀", "",
+        "- 端到端正確率同時反映分割門檻與花況分類造成的錯誤，應與涵蓋率及條件式正確率一併判讀。",
+        "- 面積門檻應使用 validation 或獨立校正集決定，不應依同一 test 的最佳結果調整。",
+        "- 各花種與各階段的分項結果可用來安排後續資料補強與錯誤分析。",
+        "- 實際應用應保留 `all_black`、`area_too_small` 與 DINO／YOLO 花種不一致警示；高 confidence 仍可能判錯。", "",
         "## 輸出檔案", "",
         "- `per_image_species.csv`：每張原圖、每種植物的完整中間結果與錯誤來源。",
         "- `threshold_sweep.csv`：面積門檻敏感度。",
